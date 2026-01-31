@@ -15,6 +15,6 @@ Suggests: knitr, rmarkdown, testthat (>= 3.0.0), httptest2, covr,
         mockery
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2026-01-31 05:09:50 UTC; 18447
+Packaged: 2026-01-31 05:18:45 UTC; 18447
 Author: First Last [aut, cre]
 Maintainer: First Last <first.last@example.com>
