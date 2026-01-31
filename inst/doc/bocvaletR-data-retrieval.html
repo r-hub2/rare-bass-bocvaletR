@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Data Retrieval with bocvaletR</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Data Retrieval with bocvaletR</h1>
+
+
+
+<div id="bocvaletr-package-data-retrieval" class="section level1">
+<h1>bocvaletR package data retrieval</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(bocvaletR)</span></code></pre></div>
+<div id="overview" class="section level3">
+<h3>1. Overview</h3>
+<p>This vignette focuses on retrieving data from the Bank of Canada
+Valet API using bocvaletR. It covers the main data access functions and
+common workflows.</p>
+</div>
+<div id="discover-available-data" class="section level3">
+<h3>2. Discover available data</h3>
+<div id="section-2.1-boc_list_series-searching-for-individual-series" class="section level4">
+<h4>Section 2.1: <code>boc_list_series()</code> — Searching for
+individual series</h4>
+<p>In order to browse through single available series and acquire the ID
+codes required to retrieve time series observations, we use the
+<code>boc_list_series()</code> function. This function returns metadata
+for all available Bank of Canada series, rather than the observations
+themselves.</p>
+<p>The function contains the following arguments:</p>
+<ul>
+<li><p><code>keyword</code>: An optional character string used to search
+for series by ID, label, or description. This is useful for narrowing
+down results to a specific topic of interest.</p></li>
+<li><p><code>limit</code>: An optional integer specifying the maximum
+number of series to return. This can be used to restrict the output when
+exploring a large number of available series.</p></li>
+<li><p><code>as</code>: A character string indicating the output
+format.<br />
+The default value <code>&quot;df&quot;</code> returns a tidy data frame, while
+<code>&quot;json&quot;</code> returns the raw JSON response from the Valet
+API.</p></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>series <span class="ot">&lt;-</span><span class="fu">boc_list_series</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">head</span>(series)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 4
+##   id     label                        description                          link 
+##   &lt;chr&gt;  &lt;chr&gt;                        &lt;chr&gt;                                &lt;chr&gt;
+## 1 A.AGRI Annual BCPI Agriculture      Annual Bank of Canada commodity pri… http…
+## 2 A.BCNE Annual BCPI Excluding Energy Annual Bank of Canada commodity pri… http…
+## 3 A.BCPI Annual BCPI Total            Annual Bank of Canada commodity pri… http…
+## 4 A.ENER Annual BCPI Energy           Annual Bank of Canada commodity pri… http…
+## 5 A.FISH Annual BCPI Fish             Annual Bank of Canada commodity pri… http…
+## 6 A.FOPR Annual BCPI Forestry         Annual Bank of Canada commodity pri… http…</code></pre>
+<p>Note that there are currently 4 of series ID in the data set. We can
+use the keyword and limit argument to filter the series names.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>exchange <span class="ot">&lt;-</span> <span class="fu">boc_list_series</span>(<span class="at">keyword=</span><span class="st">&#39;exchange&#39;</span>,<span class="at">limit=</span><span class="dv">5</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>exchange</span></code></pre></div>
+<pre><code>## # A tibble: 5 × 4
+##   id               label                                       description link 
+##   &lt;chr&gt;            &lt;chr&gt;                                       &lt;chr&gt;       &lt;chr&gt;
+## 1 CEER_BROADM      Monthly Real Canadian Effective Exchange R… Real Canad… http…
+## 2 CEER_BROADN      Daily Nominal Canadian Effective Exchange … Nominal Ca… http…
+## 3 CEER_BROADNM     Monthly Nominal Canadian Effective Exchang… Nominal Ca… http…
+## 4 CEER_BROADN_XUS  Daily Nominal CEER excluding the U.S. doll… Nominal Ca… http…
+## 5 CEER_BROADN_XUSM Monthly Nominal CEER excluding the U.S. do… Nominal Ca… http…</code></pre>
+</div>
+<div id="section-2.2-boc_list_groups---searching-for-series-groups-with" class="section level4">
+<h4>Section 2.2: <code>boc_list_groups</code> - Searching for series
+groups with</h4>
+<p>In addition to searching for individual data series, the Bank of
+Canada organizes related series into groups. Grouping provides a
+convenient way to explore collections of thematically related time
+series and is particularly useful for exploratory analysis.</p>
+<p>The <code>boc_list_groups()</code> function returns metadata
+describing all available series groups, rather than the observations
+themselves. Each group contains multiple related series that can later
+be retrieved together.</p>
+<p>The function contains the following arguments:</p>
+<ul>
+<li><p><code>keyword</code>: An optional character string used to search
+for groups by group ID, label, or description. This allows users to
+quickly locate groups related to a specific topic.</p></li>
+<li><p><code>limit</code>: An optional integer specifying the maximum
+number of groups returned.</p></li>
+<li><p><code>as</code>: A character string indicating the output
+format.<br />
+The default <code>&quot;df&quot;</code> returns a tidy data frame, while
+<code>&quot;json&quot;</code> returns the raw JSON response from the Valet
+API.</p></li>
+<li><p><code>clean_description</code>: A logical value indicating
+whether HTML tags and formatting should be removed from the group
+descriptions. The default value <code>TRUE</code> produces cleaner and
+more readable output.</p></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">boc_list_groups</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">head</span>(groups)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 4
+##   id          label                         description                    link 
+##   &lt;chr&gt;       &lt;chr&gt;                         &lt;chr&gt;                          &lt;chr&gt;
+## 1 sdp-2012-8  Staff Discussion Paper 2012-8 This file contains data based… http…
+## 2 swp-2012-37 Staff Working Paper 2012-37   This file contains data based… http…
+## 3 swp-2015-46 Staff Working Paper 2015-46   This file contains data based… http…
+## 4 swp-2013-42 Staff Working Paper 2013-42   This file contains data based… http…
+## 5 sdp-2014-3  Staff Discussion Paper 2014-3 This file contains data based… http…
+## 6 sdp-2016-5  Staff Discussion Paper 2016-5 This file contains data based… http…</code></pre>
+<p>Similar to <code>boc_list_series</code>, we can use
+<code>keyword</code> and <code>limit</code> argument to filter the data
+set.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>FX <span class="ot">&lt;-</span> <span class="fu">boc_list_groups</span>(<span class="at">keyword =</span> <span class="st">&#39;FX&#39;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>FX</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 4
+##   id                     label                            description      link 
+##   &lt;chr&gt;                  &lt;chr&gt;                            &lt;chr&gt;            &lt;chr&gt;
+## 1 SWP-USCANPFX           U.S. / CAD nominal exchange rate Scroll down for… http…
+## 2 FX_RATES_DAILY_CURRENT Daily exchange rates             Daily average e… http…
+## 3 FX_RATES_RECIPROCAL    Daily reciprocal exchange rates  Daily average r… http…
+## 4 FX_RATES_DAILY         Daily exchange rates             Daily average e… http…
+## 5 FX_RATES_MONTHLY       Monthly exchange rates           Monthly average… http…
+## 6 FX_RATES_ANNUAL        Annual exchange rates            Annual average … http…</code></pre>
+</div>
+<div id="section-2.3-boc_groups---retrieving-all-series-within-a-group" class="section level4">
+<h4>Section 2.3: <code>boc_groups()</code> - Retrieving all series
+within a group</h4>
+<p>Once a relevant series group has been identified, all series
+contained within that group can be retrieved using the
+<code>boc_groups()</code> function. This provides a convenient way to
+download a collection of related time series in a single step.</p>
+<p>The <code>boc_groups()</code> function requires a group ID as input
+and returns the observations for all series associated with that group.
+This is particularly useful when analyzing a set of thematically related
+indicators or when performing exploratory data analysis across multiple
+series.</p>
+<p>The function contains the following arguments:</p>
+<ul>
+<li><p><code>group_id</code>: A character string specifying the group ID
+to be retrieved. This value can be obtained from the output of
+<code>boc_list_groups()</code>.</p></li>
+<li><p><code>as</code>: A character string indicating the output
+format.<br />
+The default <code>&quot;df&quot;</code> returns a tidy data frame, while
+<code>&quot;json&quot;</code> returns the raw JSON response from the Valet
+API.</p></li>
+</ul>
+<p>In this example, we demonstrate how to retrieve the series within
+<code>FX_RATES_DAILY</code> group</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>FX[<span class="dv">4</span>,] <span class="co">#this is the group information retrieved from section 2.2</span></span></code></pre></div>
+<pre><code>## # A tibble: 1 × 4
+##   id             label                description                          link 
+##   &lt;chr&gt;          &lt;chr&gt;                &lt;chr&gt;                                &lt;chr&gt;
+## 1 FX_RATES_DAILY Daily exchange rates Daily average exchange rates - publ… http…</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>FX_RATE_DAILY <span class="ot">=</span> <span class="fu">boc_groups</span>(FX[<span class="dv">4</span>,]<span class="sc">$</span>id)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>FX_RATE_DAILY<span class="sc">$</span>series</span></code></pre></div>
+<pre><code>## # A tibble: 26 × 3
+##    id       label   link                                             
+##    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;                                            
+##  1 FXAUDCAD AUD/CAD https://www.bankofcanada.ca/valet/series/FXAUDCAD
+##  2 FXBRLCAD BRL/CAD https://www.bankofcanada.ca/valet/series/FXBRLCAD
+##  3 FXCNYCAD CNY/CAD https://www.bankofcanada.ca/valet/series/FXCNYCAD
+##  4 FXEURCAD EUR/CAD https://www.bankofcanada.ca/valet/series/FXEURCAD
+##  5 FXHKDCAD HKD/CAD https://www.bankofcanada.ca/valet/series/FXHKDCAD
+##  6 FXINRCAD INR/CAD https://www.bankofcanada.ca/valet/series/FXINRCAD
+##  7 FXIDRCAD IDR/CAD https://www.bankofcanada.ca/valet/series/FXIDRCAD
+##  8 FXJPYCAD JPY/CAD https://www.bankofcanada.ca/valet/series/FXJPYCAD
+##  9 FXMYRCAD MYR/CAD https://www.bankofcanada.ca/valet/series/FXMYRCAD
+## 10 FXMXNCAD MXN/CAD https://www.bankofcanada.ca/valet/series/FXMXNCAD
+## # ℹ 16 more rows</code></pre>
+</div>
+</div>
+<div id="retrieving-data-series-using-series-ids" class="section level3">
+<h3>3. Retrieving data series using series IDs</h3>
+<blockquote>
+<p><strong>Note</strong><br />
+All Bank of Canada time series are uniquely identified by a
+<strong>series ID</strong>. These IDs can be obtained using
+<code>boc_list_series()</code> or extracted from the output of
+<code>boc_list_groups()</code> and <code>boc_groups()</code>. Once a
+valid series ID is available, the corresponding observations can be
+retrieved directly using the <code>boc_series()</code> function.</p>
+</blockquote>
+<p>The <code>boc_series()</code> function retrieves one or more data
+series given their corresponding series IDs. Series IDs uniquely
+identify each Bank of Canada time series and can be obtained using
+<code>boc_list_series()</code> or extracted from group-based
+queries.</p>
+<p>The function contains the following arguments:</p>
+<ul>
+<li><p><code>series_id</code>: A character string or character vector
+specifying one or more series IDs to be retrieved. This argument is
+required.</p></li>
+<li><p><code>as</code>: A character string indicating the output
+format.<br />
+The default value <code>&quot;df&quot;</code> returns a tidy data frame suitable
+for analysis, while <code>&quot;json&quot;</code> returns the raw JSON response
+from the Valet API.</p></li>
+</ul>
+<div id="section-3.1-retrieving-a-single-data-series" class="section level4">
+<h4>Section 3.1: Retrieving a single data series</h4>
+<p>The <code>boc_series()</code> function retrieves observations for one
+or more data series given their corresponding series IDs. This function
+returns the actual time series data and is the primary interface for
+accessing numerical observations in bocvaletR.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>fx <span class="ot">&lt;-</span> <span class="fu">boc_series</span>(<span class="st">&quot;FXUSDCAD&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">head</span>(fx)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 3
+##   date       series   value
+##   &lt;date&gt;     &lt;chr&gt;    &lt;dbl&gt;
+## 1 2017-01-03 FXUSDCAD  1.34
+## 2 2017-01-04 FXUSDCAD  1.33
+## 3 2017-01-05 FXUSDCAD  1.32
+## 4 2017-01-06 FXUSDCAD  1.32
+## 5 2017-01-09 FXUSDCAD  1.32
+## 6 2017-01-10 FXUSDCAD  1.32</code></pre>
+</div>
+<div id="section-3.2-retrieving-multiple-data-series" class="section level4">
+<h4>Section 3.2: Retrieving multiple data series</h4>
+<p>Multiple series can be retrieved simultaneously by providing a vector
+of series IDs. This is particularly useful when comparing related
+indicators or analyzing multiple exchange rates together.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;FXUSDCAD&quot;</span>, <span class="st">&quot;FXEURCAD&quot;</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>fx_multi <span class="ot">&lt;-</span> <span class="fu">boc_series</span>(ids)</span></code></pre></div>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">head</span>(fx_multi)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 3
+##   date       series   value
+##   &lt;date&gt;     &lt;chr&gt;    &lt;dbl&gt;
+## 1 2017-01-03 FXUSDCAD  1.34
+## 2 2017-01-04 FXUSDCAD  1.33
+## 3 2017-01-05 FXUSDCAD  1.32
+## 4 2017-01-06 FXUSDCAD  1.32
+## 5 2017-01-09 FXUSDCAD  1.32
+## 6 2017-01-10 FXUSDCAD  1.32</code></pre>
+</div>
+<div id="section-3.3-using-series-ids-obtained-from-groups" class="section level4">
+<h4>Section 3.3 Using series IDs obtained from groups</h4>
+<p>Series IDs obtained from <code>boc_list_groups()</code> or
+<code>boc_groups()</code> can be passed directly to
+<code>boc_series()</code>, allowing flexible workflows in which users
+first explore available groups and then retrieve specific series of
+interest.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">boc_list_groups</span>(<span class="at">keyword =</span> <span class="st">&quot;exchange&quot;</span>, <span class="at">limit =</span> <span class="dv">1</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>group_id <span class="ot">&lt;-</span> groups<span class="sc">$</span>id[<span class="dv">1</span>]</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>group_data <span class="ot">&lt;-</span> <span class="fu">boc_groups</span>(group_id)</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>series_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(group_data<span class="sc">$</span>series<span class="sc">$</span>id)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>fx_selected <span class="ot">&lt;-</span> <span class="fu">boc_series</span>(series_ids[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="fu">head</span>(fx_selected)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 3
+##   date       series               value
+##   &lt;date&gt;     &lt;chr&gt;                &lt;dbl&gt;
+## 1 2006-01-03 SWP_CHBO_20160630_01  1.46
+## 2 2006-01-04 SWP_CHBO_20160630_01  1.90
+## 3 2006-01-05 SWP_CHBO_20160630_01  2.04
+## 4 2006-01-06 SWP_CHBO_20160630_01  2.00
+## 5 2006-01-09 SWP_CHBO_20160630_01  1.92
+## 6 2006-01-10 SWP_CHBO_20160630_01  1.53</code></pre>
+</div>
+</div>
+<div id="monitoring-foreign-exchange-updates-with-boc_fx_rss" class="section level3">
+<h3>4. Monitoring foreign exchange updates with
+<code>boc_fx_rss()</code></h3>
+<blockquote>
+<p><strong>Note</strong><br />
+In addition to retrieving historical time series data, bocvaletR
+provides access to the Bank of Canada foreign exchange RSS feed. This
+feed is designed for monitoring <strong>recent updates</strong> to
+exchange rate series rather than for retrieving long historical
+records.</p>
+</blockquote>
+<p>The <code>boc_fx_rss()</code> function retrieves the latest foreign
+exchange updates published by the Bank of Canada. Unlike
+<code>boc_series()</code>, which returns complete time series
+observations, this function focuses on newly released or recently
+updated exchange rate information.</p>
+<p>The <code>boc_fx_rss_available()</code> function retrieves the
+information of all the available <code>fx_rss</code> id.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>rss_id <span class="ot">&lt;-</span><span class="fu">boc_fx_rss_available</span>()</span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>rss_id</span></code></pre></div>
+<pre><code>## # A tibble: 23 × 6
+##    item_series target_currency base_currency rate_type             country pair 
+##    &lt;chr&gt;       &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;                 &lt;chr&gt;   &lt;chr&gt;
+##  1 FXAUDCAD    AUD             CAD           Bank of Canada excha… CA      AUD/…
+##  2 FXBRLCAD    BRL             CAD           Bank of Canada excha… CA      BRL/…
+##  3 FXCHFCAD    CHF             CAD           Bank of Canada excha… CA      CHF/…
+##  4 FXCNYCAD    CNY             CAD           Bank of Canada excha… CA      CNY/…
+##  5 FXEURCAD    EUR             CAD           Bank of Canada excha… CA      EUR/…
+##  6 FXGBPCAD    GBP             CAD           Bank of Canada excha… CA      GBP/…
+##  7 FXHKDCAD    HKD             CAD           Bank of Canada excha… CA      HKD/…
+##  8 FXIDRCAD    IDR             CAD           Bank of Canada excha… CA      IDR/…
+##  9 FXINRCAD    INR             CAD           Bank of Canada excha… CA      INR/…
+## 10 FXJPYCAD    JPY             CAD           Bank of Canada excha… CA      JPY/…
+## # ℹ 13 more rows</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>rss <span class="ot">&lt;-</span> <span class="fu">boc_fx_rss</span>()</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>rss</span></code></pre></div>
+<pre><code>## # A tibble: 23 × 12
+##    feed_series item_series title   link  description dc_date_utc           value
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;       &lt;dttm&gt;                &lt;dbl&gt;
+##  1 &lt;NA&gt;        FXAUDCAD    CA: 0.… http… 1 AUD = 0.… 2026-01-30 21:30:00 9.48e-1
+##  2 &lt;NA&gt;        FXBRLCAD    CA: 0.… http… 1 BRL = 0.… 2026-01-30 21:30:00 2.59e-1
+##  3 &lt;NA&gt;        FXCNYCAD    CA: 0.… http… 1 CNY = 0.… 2026-01-30 21:30:00 1.95e-1
+##  4 &lt;NA&gt;        FXEURCAD    CA: 1.… http… 1 EUR = 1.… 2026-01-30 21:30:00 1.61e+0
+##  5 &lt;NA&gt;        FXHKDCAD    CA: 0.… http… 1 HKD = 0.… 2026-01-30 21:30:00 1.74e-1
+##  6 &lt;NA&gt;        FXINRCAD    CA: 0.… http… 1 INR = 0.… 2026-01-30 21:30:00 1.48e-2
+##  7 &lt;NA&gt;        FXIDRCAD    CA: 0.… http… 1 IDR = 0.… 2026-01-30 21:30:00 8.10e-5
+##  8 &lt;NA&gt;        FXJPYCAD    CA: 0.… http… 1 JPY = 0.… 2026-01-30 21:30:00 8.78e-3
+##  9 &lt;NA&gt;        FXMXNCAD    CA: 0.… http… 1 MXN = 0.… 2026-01-30 21:30:00 7.81e-2
+## 10 &lt;NA&gt;        FXNZDCAD    CA: 0.… http… 1 NZD = 0.… 2026-01-30 21:30:00 8.20e-1
+## # ℹ 13 more rows
+## # ℹ 5 more variables: base_currency &lt;chr&gt;, target_currency &lt;chr&gt;,
+## #   rate_type &lt;chr&gt;, observation_period_utc &lt;dttm&gt;, country &lt;chr&gt;</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co">#retrieving single fx_rss with rss_id</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>rss_AUD <span class="ot">&lt;-</span> <span class="fu">boc_fx_rss</span>(rss_id<span class="sc">$</span>item_series[<span class="dv">1</span>])</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>rss_AUD</span></code></pre></div>
+<pre><code>## # A tibble: 1 × 12
+##   feed_series item_series title      link  description dc_date_utc         value
+##   &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;       &lt;dttm&gt;              &lt;dbl&gt;
+## 1 FXAUDCAD    FXAUDCAD    CA: 0.947… http… 1 AUD = 0.… 2026-01-30 21:30:00 0.948
+## # ℹ 5 more variables: base_currency &lt;chr&gt;, target_currency &lt;chr&gt;,
+## #   rate_type &lt;chr&gt;, observation_period_utc &lt;dttm&gt;, country &lt;chr&gt;</code></pre>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
